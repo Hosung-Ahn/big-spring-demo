@@ -1,14 +1,9 @@
 package com.example.demo.repository;
 
-import com.querydsl.jpa.impl.JPAQueryFactory;
-import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
+import com.example.demo.domain.Member;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-@RequiredArgsConstructor
-@Transactional
-public class MemberRepository {
-    private final JPAQueryFactory query;
-
+public interface MemberRepository extends JpaRepository<Member, Long>{
 }
