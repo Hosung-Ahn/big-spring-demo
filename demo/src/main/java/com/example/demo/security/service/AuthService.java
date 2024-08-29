@@ -7,6 +7,7 @@ import com.example.demo.oauth2.service.OAuth2Service;
 import com.example.demo.oauth2.util.userprofile.data.UserProfileData;
 import com.example.demo.repository.MemberRepository;
 import com.example.demo.security.data.JwtAuthData;
+import com.example.demo.security.data.LoginSuccessData;
 import com.example.demo.security.exception.OAuth2ProviderDuplicationException;
 import com.example.demo.security.util.AtRtCreator;
 import com.example.demo.service.MemberService;
@@ -26,7 +27,7 @@ public class AuthService {
     private final AtRtCreator atRtCreator;
 
     @Transactional
-    public LoginResponseDto login(String code, OAuth2Provider provider) {
+    public LoginSuccessData login(String code, OAuth2Provider provider) {
         UserProfileData userProfile = oAuth2Service.getUserProfile(code, provider);
 
         // 이미 가입된 회원이라면 회원 정보를 바로 반환하고
@@ -44,6 +45,6 @@ public class AuthService {
         }
 
         JwtAuthData jwtAuthData = atRtCreator.create(member);
-        return new LoginResponseDto(member, jwtAuthData, firstLogin.get());
+        return new LoginSuccessData(member, firstLogin.get(), jwtAuthData);
     }
 }

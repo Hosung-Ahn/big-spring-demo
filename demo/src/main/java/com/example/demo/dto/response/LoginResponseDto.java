@@ -2,6 +2,7 @@ package com.example.demo.dto.response;
 
 import com.example.demo.domain.Member;
 import com.example.demo.security.data.JwtAuthData;
+import com.example.demo.security.data.LoginSuccessData;
 import lombok.Data;
 
 @Data
@@ -11,10 +12,10 @@ public class LoginResponseDto {
     private String accessToken;
     private Long refreshTokenExpireTime;
 
-    public LoginResponseDto(Member member, JwtAuthData jwtAuthData, boolean firstLogin) {
-        this.memberId = member.getId();
-        this.firstLogin = firstLogin;
-        this.accessToken = jwtAuthData.getAccessToken();
-        this.refreshTokenExpireTime = jwtAuthData.getRefreshTokenExpirationFromNowInMS();
+    public LoginResponseDto(LoginSuccessData loginSuccessData) {
+        this.memberId = loginSuccessData.getMember().getId();
+        this.firstLogin = loginSuccessData.isFirstLogin();
+        this.accessToken = loginSuccessData.getJwtAuthData().getAccessToken();
+        this.refreshTokenExpireTime = loginSuccessData.getJwtAuthData().getRefreshTokenExpirationFromNowInMS();
     }
 }
