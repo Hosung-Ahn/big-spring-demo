@@ -42,6 +42,10 @@ public class Member extends DateBaseEntity{
         authorities.forEach(this::addAuthority);
     }
 
+    public void updateLastLoginAt() {
+        this.lastLoginAt = LocalDateTime.now();
+    }
+
     private void addAuthority(EAuthority eAuthority) {
         this.authorities.add(new Authority(eAuthority, this));
     }

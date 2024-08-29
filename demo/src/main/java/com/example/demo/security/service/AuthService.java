@@ -39,6 +39,8 @@ public class AuthService {
             return memberService.registerUser(userProfile.getName(), userProfile.getEmail(), userProfile.getImageUrl(), provider);
         });
 
+        member.updateLastLoginAt();
+
         // 가입된 유저의 소셜 사이트와 로그인한 소셜 사이트가 다르다면 예외를 발생시킵니다.
         if (!member.getOAuth2Provider().equals(provider.name())) {
             throw new OAuth2ProviderDuplicationException(member.getOAuth2Provider());
