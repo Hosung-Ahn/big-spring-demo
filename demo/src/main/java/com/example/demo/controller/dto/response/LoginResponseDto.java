@@ -1,7 +1,5 @@
 package com.example.demo.controller.dto.response;
 
-import com.example.demo.domain.Member;
-import com.example.demo.security.data.JwtAuthData;
 import com.example.demo.security.data.LoginSuccessData;
 import lombok.Data;
 

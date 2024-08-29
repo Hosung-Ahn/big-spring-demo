@@ -28,7 +28,6 @@ public class AtRtCreator {
     }
 
     public JwtAuthData refresh(String refreshToken) {
-        // refreshToken 에서 memberId 를 찾습니다. 이때 유효성 검사도 자동으로 진행됩니다.
         Long memberId = jwtClaimReader.getMemberId(refreshToken);
         Collection<? extends GrantedAuthority> authorities = jwtClaimReader.getAuthorities(refreshToken);
 

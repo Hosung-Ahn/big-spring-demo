@@ -2,7 +2,9 @@ package com.example.demo.controller;
 
 import com.example.demo.controller.dto.request.LoginRequestDto;
 import com.example.demo.controller.dto.response.LoginResponseDto;
+import com.example.demo.controller.dto.response.RefreshResponseDto;
 import com.example.demo.oauth2.OAuth2Provider;
+import com.example.demo.security.data.JwtAuthData;
 import com.example.demo.security.data.LoginSuccessData;
 import com.example.demo.security.service.AuthService;
 import lombok.RequiredArgsConstructor;
@@ -38,9 +40,22 @@ public class AuthController {
     public ResponseEntity<String> logout(@RequestHeader(value = "Authorization", required = false) String accessTokenInHeader,
                                          @CookieValue(required = false) String refreshToken ) {
         String accessToken = getAccessToken(accessTokenInHeader);
-
         authService.logout(accessToken, refreshToken);
         return ResponseEntity.ok("logout success");
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<RefreshResponseDto> refresh(@CookieValue String refreshToken) {
+        JwtAuthData refresh = authService.refresh(refreshToken);
+
+        String newRefreshToken = refresh.getRefreshToken();
+        long newRefreshTokenExpireTime = refresh.getRefreshTokenExpirationFromNowInMS();
+        HttpCookie newRefreshTokenCookie = createRefreshTokenCookie(newRefreshToken, newRefreshTokenExpireTime);
+
+        return ResponseEntity
+                .ok()
+                .header("Set-Cookie", newRefreshTokenCookie.toString())
+                .body(new RefreshResponseDto(refresh));
     }
 
     private HttpCookie createRefreshTokenCookie(String refreshToken, long expireTime) {

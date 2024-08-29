@@ -1,6 +1,9 @@
 package com.example.demo.security.service;
 
 import com.example.demo.domain.Member;
+import com.example.demo.jwt.JwtClaimReader;
+import com.example.demo.jwt.JwtCreator;
+import com.example.demo.jwt.JwtValidator;
 import com.example.demo.oauth2.OAuth2Provider;
 import com.example.demo.oauth2.service.OAuth2Service;
 import com.example.demo.oauth2.util.userprofile.data.UserProfileData;
@@ -28,7 +31,7 @@ public class AuthService {
     private final AtRtCreator atRtCreator;
     private final AccessTokenRepository accessTokenRepository;
     private final RefreshTokenRepository refreshTokenRepository;
-
+    private final JwtValidator jwtValidator;
     @Transactional
     public LoginSuccessData login(String code, OAuth2Provider provider) {
         UserProfileData userProfile = oAuth2Service.getUserProfile(code, provider);
@@ -58,13 +61,17 @@ public class AuthService {
             accessTokenRepository.delete(accessToken);
             refreshTokenRepository.delete(refreshToken);
         } else if (accessToken != null) {
-            String pairRefreshToken = accessTokenRepository.getRt(accessToken).orElse(null);
-            refreshTokenRepository.delete(pairRefreshToken);
+            accessTokenRepository.getRt(accessToken).ifPresent(refreshTokenRepository::delete);
             accessTokenRepository.delete(accessToken);
         } else if (refreshToken != null) {
-            String pairAccessToken = refreshTokenRepository.getAt(refreshToken).orElse(null);
-            accessTokenRepository.delete(pairAccessToken);
+            refreshTokenRepository.getAt(refreshToken).ifPresent(accessTokenRepository::delete);
             refreshTokenRepository.delete(refreshToken);
         }
+    }
+
+    public JwtAuthData refresh(String refreshToken) {
+        jwtValidator.validateRefreshToken(refreshToken);
+
+        return atRtCreator.refresh(refreshToken);
     }
 }
