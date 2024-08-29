@@ -1,7 +1,7 @@
 package com.example.demo.controller;
 
-import com.example.demo.dto.request.LoginRequestDto;
-import com.example.demo.dto.response.LoginResponseDto;
+import com.example.demo.controller.dto.request.LoginRequestDto;
+import com.example.demo.controller.dto.response.LoginResponseDto;
 import com.example.demo.oauth2.OAuth2Provider;
 import com.example.demo.security.data.LoginSuccessData;
 import com.example.demo.security.service.AuthService;
@@ -9,15 +9,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpCookie;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class AuthController {
+    private final String BEARER_PREFIX = "Bearer ";
     private final AuthService authService;
 
     @PostMapping("/login")
@@ -36,11 +34,27 @@ public class AuthController {
                 .body(new LoginResponseDto(login));
     }
 
+    @GetMapping("/logout")
+    public ResponseEntity<String> logout(@RequestHeader(value = "Authorization", required = false) String accessTokenInHeader,
+                                         @CookieValue(required = false) String refreshToken ) {
+        String accessToken = getAccessToken(accessTokenInHeader);
+
+        authService.logout(accessToken, refreshToken);
+        return ResponseEntity.ok("logout success");
+    }
+
     private HttpCookie createRefreshTokenCookie(String refreshToken, long expireTime) {
         return ResponseCookie.from("refreshToken", refreshToken)
                 .httpOnly(true)
                 .path("/")
                 .maxAge(expireTime)
                 .build();
+    }
+
+    private String getAccessToken(String accessTokenInHeader) {
+        if (accessTokenInHeader.length() < BEARER_PREFIX.length()) {
+            return "";
+        }
+        return accessTokenInHeader.substring(BEARER_PREFIX.length());
     }
 }

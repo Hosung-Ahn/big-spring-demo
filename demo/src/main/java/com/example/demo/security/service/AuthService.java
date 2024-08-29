@@ -1,7 +1,6 @@
 package com.example.demo.security.service;
 
 import com.example.demo.domain.Member;
-import com.example.demo.dto.response.LoginResponseDto;
 import com.example.demo.oauth2.OAuth2Provider;
 import com.example.demo.oauth2.service.OAuth2Service;
 import com.example.demo.oauth2.util.userprofile.data.UserProfileData;
@@ -9,6 +8,8 @@ import com.example.demo.repository.MemberRepository;
 import com.example.demo.security.data.JwtAuthData;
 import com.example.demo.security.data.LoginSuccessData;
 import com.example.demo.security.exception.OAuth2ProviderDuplicationException;
+import com.example.demo.security.repository.AccessTokenRepository;
+import com.example.demo.security.repository.RefreshTokenRepository;
 import com.example.demo.security.util.AtRtCreator;
 import com.example.demo.service.MemberService;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,8 @@ public class AuthService {
     private final OAuth2Service oAuth2Service;
     private final MemberRepository memberRepository;
     private final AtRtCreator atRtCreator;
+    private final AccessTokenRepository accessTokenRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     @Transactional
     public LoginSuccessData login(String code, OAuth2Provider provider) {
@@ -48,5 +51,20 @@ public class AuthService {
 
         JwtAuthData jwtAuthData = atRtCreator.create(member);
         return new LoginSuccessData(member, firstLogin.get(), jwtAuthData);
+    }
+
+    public void logout(String accessToken, String refreshToken) {
+        if (accessToken != null && refreshToken != null) {
+            accessTokenRepository.delete(accessToken);
+            refreshTokenRepository.delete(refreshToken);
+        } else if (accessToken != null) {
+            String pairRefreshToken = accessTokenRepository.getRt(accessToken).orElse(null);
+            refreshTokenRepository.delete(pairRefreshToken);
+            accessTokenRepository.delete(accessToken);
+        } else if (refreshToken != null) {
+            String pairAccessToken = refreshTokenRepository.getAt(refreshToken).orElse(null);
+            accessTokenRepository.delete(pairAccessToken);
+            refreshTokenRepository.delete(refreshToken);
+        }
     }
 }

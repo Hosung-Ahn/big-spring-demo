@@ -1,4 +1,4 @@
-package com.example.demo.dto.response;
+package com.example.demo.controller.dto.response;
 
 import com.example.demo.domain.Member;
 import com.example.demo.security.data.JwtAuthData;
